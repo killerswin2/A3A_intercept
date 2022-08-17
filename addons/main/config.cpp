@@ -16,7 +16,7 @@ class CfgPatches {
 class Intercept {
     class A3A {
         class A3A_intercept_plugin { 
-            pluginName = "A3A_intercept_plugin"; 
+            pluginName = "A3A-intercept-plugin"; 
         };
     };
 };
