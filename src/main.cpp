@@ -1,17 +1,11 @@
-#include <intercept.hpp>
+#include "commands.hpp"
 #include <algorithm>
 #include <cmath>
 
 
+Commands& commands = Commands::get();
 
-intercept::types::registered_sqf_function helloIntercept;
-intercept::types::registered_sqf_function clampAngleFunction;
 
-game_value helloWorldSystemChat()
-{
-    intercept::sqf::system_chat("Hello Intercept, goodbye sqf!");
-    return true;
-}
 
 // returns a value inbetween 0..360
 float clampAxis(float angle)
@@ -20,7 +14,7 @@ float clampAxis(float angle)
 
     if (angle < 0)
     {
-        angle + 360.0f;
+        angle = angle + 360.0f;
     }
 
     return angle;
@@ -72,8 +66,8 @@ void intercept::register_interfaces() {
 }
 
 void intercept::pre_start() {
-    helloIntercept = intercept::client::host::register_sqf_command("helloIntercept", "Print Hello", userFunctionWrapper<helloWorldSystemChat>, intercept::types::GameDataType::BOOL);
-    clampAngleFunction = intercept::client::host::register_sqf_command("clampAngle", "clamp angles a,b,c", userFunctionWrapper<clampAngle>, intercept::types::GameDataType::SCALAR, intercept::types::GameDataType::ARRAY);
+    commands.addCommand("clampAngle", "clamp angles a,b,c", userFunctionWrapper<clampAngle>, intercept::types::GameDataType::SCALAR, intercept::types::GameDataType::ARRAY);
+    
 }
 
 void intercept::pre_init() {
