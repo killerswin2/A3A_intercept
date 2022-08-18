@@ -4,6 +4,9 @@ cmake_minimum_required (VERSION 3.0)
 file(GLOB_RECURSE INTERCEPT_PLUGIN_SOURCES *.h *.hpp *.c *.cpp)
 SOURCE_GROUP("src" FILES ${INTERCEPT_PLUGIN_SOURCES})
 
+file(GLOB INTERCEPT_plugin_utilities_SOURCES "Geometry/*.cpp" "Geometry/*.hpp" "Geometry/*.h")
+SOURCE_GROUP("src/Geometry" FILES ${INTERCEPT_plugin_Geometry_SOURCES})
+
 #If you want to split your source files into different directories you can do so here
 
 #The SOURCE_GROUP string is the directory it will display as inside your visual studio.
