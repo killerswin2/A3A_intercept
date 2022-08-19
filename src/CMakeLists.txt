@@ -1,6 +1,7 @@
 cmake_minimum_required (VERSION 3.0)
 
-set(BUILD_TESTING "" OFF BOOL)
+set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
+option(BUILD_TESTING "" OFF)
 add_subdirectory(vendors/glm)
 
 file(GLOB_RECURSE INTERCEPT_PLUGIN_SOURCES *.h *.hpp *.c *.cpp)
