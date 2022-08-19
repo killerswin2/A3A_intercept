@@ -16,7 +16,16 @@ Rotator::Rotator()
 Rotator::~Rotator()
 {
 }
-// returns a value between 0..360
+
+
+
+/*
+ * @brief returns a value between 0 and 360 degrees
+ * @author Killerswin2
+ * @param angle float angle in degrees to be AxisClamped
+ * @return float clampedAxis
+ * @see Rotator::clampAxis for sqf cmd
+ */
 float Rotator::clampAxisInternal(float angle)
 {
     angle = std::fmod(angle, 360);
@@ -29,7 +38,13 @@ float Rotator::clampAxisInternal(float angle)
     return angle;
 }
 
-// returns a value between -180..180
+/*
+ * @brief returns a value between -180 and 180 degrees
+ * @author Killerswin2
+ * @param angle float angle in degrees to be normalized
+ * @return float normalized angle
+ * @see Rotator::normalizeAxis for sqf cmd
+ */
 float Rotator::normalizeAxisInternal(float angle)
 {
     // make sure angle is with in (0,360)
@@ -44,7 +59,17 @@ float Rotator::normalizeAxisInternal(float angle)
 }
 
 // clamps an Angle between min angle and max angle.
-// coterminal Angles are handled.
+
+/*
+ * @brief clamps an angle in degrees between min angle and max angle.
+ * @author Killerswin2
+ * @param angle float current angle measurement
+ * @param minAngle float min allowed angle to clamp to
+ * @param maxAngle float max allowed angle to clamp to
+ * @return float normalized angle
+ * @see Rotator::clampAngle for sqf cmd
+ * @warning coterminal angles are handled, 400 -> 40
+ */
 float Rotator::clampAngleInternal(float angle, float minAngle, float maxAngle)
 {
     float deltaAngle = clampAxisInternal(maxAngle - minAngle);
@@ -64,16 +89,34 @@ float Rotator::clampAngleInternal(float angle, float minAngle, float maxAngle)
     return normalizeAxisInternal(angle);
 }
 
+/*
+ * @brief sqf wrapper for clampAngle
+ * @author Killerswin2
+ * @return SCALAR
+ * @see Rotator::clampAngleInternal for c++ implementation
+ */
 game_value Rotator::clampAngle(game_value_parameter right_arg)
 {
     return clampAngleInternal(right_arg[0], right_arg[1], right_arg[2]);
 }
 
+/*
+ * @brief sqf wrapper for normalizeAxis
+ * @author Killerswin2
+ * @return SCALAR
+ * @see Rotator::normalizeAxisInternal for c++ implementation
+ */
 game_value Rotator::normalizeAxis(game_value_parameter right_arg)
 {
     return Rotator::normalizeAxisInternal(right_arg);
 }
 
+/*
+ * @brief sqf wrapper for clampAxis
+ * @author Killerswin2
+ * @return SCALAR
+ * @see Rotator::clampAxisInternal for c++ implementation
+ */
 game_value Rotator::clampAxis(game_value_parameter right_arg)
 {
     return Rotator::clampAxisInternal(right_arg);
