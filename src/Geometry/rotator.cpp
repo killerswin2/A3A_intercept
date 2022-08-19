@@ -11,6 +11,7 @@ Rotator::Rotator()
     commands.addCommand("clampAngle", "clamp angles a,b,c", userFunctionWrapper<clampAngle>, intercept::types::GameDataType::SCALAR, intercept::types::GameDataType::ARRAY);
     commands.addCommand("clampAxis", "clamp an axis between 0..360", userFunctionWrapper<clampAxis>, intercept::types::GameDataType::SCALAR, intercept::types::GameDataType::SCALAR);
     commands.addCommand("normalizeAxis", "normalize an axis between -180..180", userFunctionWrapper<normalizeAxis>, intercept::types::GameDataType::SCALAR, intercept::types::GameDataType::SCALAR);
+    commands.addCommand("clamp", "clamp vec3 components", userFunctionWrapper<clamp>, intercept::types::GameDataType::ARRAY, intercept::types::GameDataType::ARRAY);
 }
 
 Rotator::~Rotator()
