@@ -1,5 +1,7 @@
 cmake_minimum_required (VERSION 3.0)
 
+set(BUILD_TESTING "" OFF BOOL)
+add_subdirectory(vendors/glm)
 
 file(GLOB_RECURSE INTERCEPT_PLUGIN_SOURCES *.h *.hpp *.c *.cpp)
 SOURCE_GROUP("src" FILES ${INTERCEPT_PLUGIN_SOURCES})
@@ -40,7 +42,9 @@ SOURCE_GROUP("intercept" FILES ${INTERCEPT_HOST_SOURCES})
 
 add_library( ${INTERCEPT_PLUGIN_NAME} SHARED ${INTERCEPT_PLUGIN_SOURCES} ${INTERCEPT_HOST_SOURCES})
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${INTERCEPT_INCLUDE_PATH} ${GLM_INCLUDE_DIRS})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${INTERCEPT_INCLUDE_PATH})
+target_link_libraries(${INTERCEPT_PLUGIN_NAME} glm::glm)
+target_include_directories(${INTERCEPT_PLUGIN_NAME} PUBLIC vendors/glm/glm)
 
 
 set_target_properties(${INTERCEPT_PLUGIN_NAME} PROPERTIES PREFIX "")
