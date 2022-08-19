@@ -15,6 +15,7 @@ Rotator::Rotator()
 
 Rotator::~Rotator()
 {
+
 }
 
 
@@ -58,7 +59,6 @@ float Rotator::normalizeAxisInternal(float angle)
     return angle;
 }
 
-// clamps an Angle between min angle and max angle.
 
 /*
  * @brief clamps an angle in degrees between min angle and max angle.
@@ -87,6 +87,32 @@ float Rotator::clampAngleInternal(float angle, float minAngle, float maxAngle)
     }
 
     return normalizeAxisInternal(angle);
+}
+
+
+/*
+* @brief clamps all components of a vec3 between 0 and 360
+* @author Killerswin2
+* @param x float x component
+* @param y float y component
+* @param z float z component
+* @return vec3 clamped vec3
+* @see Rotator::clamp for sqf cmd
+*/
+vector3 Rotator::clampInternal(float x, float y, float z)
+{
+    return vector3{clampAxis(x), clampAxis(y), clampAxis(z)};
+}
+
+/*
+* @brief sqf wrapper for clamp
+* @author Killerswin2
+* @return VEC3
+* @see Rotator::clampInternal for c++ implementation
+*/
+game_value Rotator::clamp(game_value_parameter right_arg)
+{
+    return clampInternal(right_arg[0], right_arg[1], right_arg[2]);
 }
 
 /*
