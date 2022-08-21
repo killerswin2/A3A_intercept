@@ -17,6 +17,12 @@ namespace Debug
 {
     static std::chrono::time_point<std::chrono::high_resolution_clock> startTime, endTime;
 
+
+    /*
+     * @brief Timing constructor
+     * @author Killerswin2
+     * @detail adds timing is for a high resolution clock to test code in sqf
+     */
     Timing::Timing()
     {
         Commands& commands = Commands::get();
@@ -28,19 +34,34 @@ namespace Debug
     {
     }
 
+    /*
+     * @brief assigns the start time
+     * @author Killerswin2
+     * @return BOOL returns true always
+     */
     game_value Timing::setStartTime()
     {
         startTime = std::chrono::high_resolution_clock::now();
         return true;
     }
 
+    /*
+     * @brief assigns the end time
+     * @author Killerswin2
+     * @return BOOL returns true always
+     */
     game_value Timing::setEndTime()
     {
         endTime = std::chrono::high_resolution_clock::now();
         return true;
     }
 
-
+    /*
+     * @brief calculates the difference of end time and start time
+     * @detail this is done async it logs the data to a file, documents for windows, var/log for linux
+     * @author Killerswin2
+     * @return BOOL returns true always
+     */
     void Timing::fileOperationsInternal()
     {
         std::chrono::duration<float> elapsedTimeSeconds = endTime - startTime;
@@ -79,6 +100,11 @@ namespace Debug
         #endif
     }
 
+    /*
+     * @brief calls fileOperationsInternal to calculate time difference
+     * @author Killerswin2
+     * @return BOOL returns true always
+     */
     game_value Timing::logTimeDifference()
     {
         auto ret = std::async(fileOperationsInternal);
