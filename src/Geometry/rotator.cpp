@@ -50,7 +50,7 @@ float Rotator::clampAxisInternal(float angle)
 float Rotator::normalizeAxisInternal(float angle)
 {
     // make sure angle is with in (0,360)
-    angle = clampAxis(angle);
+    angle = clampAxisInternal(angle);
 
     if (angle > 180.0f)
     {
@@ -102,7 +102,7 @@ float Rotator::clampAngleInternal(float angle, float minAngle, float maxAngle)
 */
 vector3 Rotator::clampInternal(float x, float y, float z)
 {
-    return vector3{clampAxis(x), clampAxis(y), clampAxis(z)};
+    return vector3{clampAxisInternal(x), clampAxisInternal(y), clampAxisInternal(z)};
 }
 
 /*
