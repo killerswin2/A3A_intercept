@@ -6,7 +6,7 @@ namespace Debug
 	class Timing
 	{
 	private:
-		static void fileOperations();
+		static void fileOperationsInternal();
 	public:
 		Timing();
 		~Timing();
