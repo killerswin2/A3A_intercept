@@ -7,8 +7,11 @@ add_subdirectory(vendors/glm)
 file(GLOB_RECURSE INTERCEPT_PLUGIN_SOURCES *.h *.hpp *.c *.cpp)
 SOURCE_GROUP("src" FILES ${INTERCEPT_PLUGIN_SOURCES})
 
-file(GLOB INTERCEPT_plugin_utilities_SOURCES "Geometry/*.cpp" "Geometry/*.hpp" "Geometry/*.h")
+file(GLOB INTERCEPT_plugin_Geometry_SOURCES "Geometry/*.cpp" "Geometry/*.hpp" "Geometry/*.h")
 SOURCE_GROUP("src/Geometry" FILES ${INTERCEPT_plugin_Geometry_SOURCES})
+
+file(GLOB INTERCEPT_plugin_debugging_SOURCES "debugging/*.cpp" "debugging/*.hpp" "debugging/*.h")
+SOURCE_GROUP("src/debugging" FILES ${INTERCEPT_plugin_debugging_SOURCES})
 
 #If you want to split your source files into different directories you can do so here
 

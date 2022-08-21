@@ -1,9 +1,13 @@
 #include <intercept.hpp>
+#include <chrono>
+#include <string>
 #include "commands.hpp"
 #include "Geometry/rotator.hpp"
+#include "debugging/timing.h"
 
 
 Commands& commands = Commands::get();
+
 
 
 
@@ -17,6 +21,7 @@ void intercept::register_interfaces() {
 
 void intercept::pre_start() {
     Rotator rotator;
+    Debug::Timing timer;
     
 }
 
