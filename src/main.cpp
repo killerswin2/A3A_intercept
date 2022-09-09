@@ -4,10 +4,10 @@
 #include "commands.hpp"
 #include "Geometry/rotator.hpp"
 #include "debugging/timing.h"
+#include "hashing/jsonHashMap.hpp"
 
 
 Commands& commands = Commands::get();
-
 
 
 
@@ -22,6 +22,7 @@ void intercept::register_interfaces() {
 void intercept::pre_start() {
     Rotator rotator;
     Debug::Timing timer;
+    hashMap::JsonHashMap::preStart();
     
 }
 
