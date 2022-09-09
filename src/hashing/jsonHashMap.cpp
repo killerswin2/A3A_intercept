@@ -105,9 +105,12 @@ game_value jsonHashCount(game_value_parameter hashmap)
 	return static_cast<JsonGameDataHashMap*>(hashmap.data.get())->map.size();
 }
 
+
+
 game_value jsonHashGet(game_value_parameter hashmap, game_value_parameter key)
 {
-	if (hashmap.is_nil()) return {};
+	// hashmap can't be nil or key can't be anything other than string.
+	if (hashmap.is_nil() || key.type_enum() != game_data_type::STRING) return {};
 	game_value retData;
 	auto hashMapPointer = static_cast<JsonGameDataHashMap*>(hashmap.data.get());
 	auto value = hashMapPointer->map.find(key);
@@ -170,6 +173,104 @@ game_value jsonHashGet(game_value_parameter hashmap, game_value_parameter key)
 	return {};
 }
 
+template<class UnaryFunction>
+void recursive_iteration(const nlohmann::json& object, UnaryFunction func)
+{
+	for (auto& item : object)
+	{
+		if (item.is_structured())
+		{
+			if (item.is_array()) {
+				recursive_iteration(item, func);
+			}
+			else if (item.is_object())
+			{
+				func(item);
+			}
+		}
+		else
+		{
+			func(item);
+		}
+	}
+}
+
+game_value jsonHashGetNested(game_value_parameter hashmap, game_value_parameter arrayData)
+{
+	//return if the hashmap is nil, or the array arg size is not bigger than 1
+	if (hashmap.is_nil() || arrayData.size() < 1) { return {}; }
+	if (arrayData.size() == 1) { return jsonHashGet(hashmap, arrayData[0]); }
+	auto hashMapPointer = static_cast<JsonGameDataHashMap*>(hashmap.data.get());
+	auto value = hashMapPointer->map.find(arrayData[0]);
+	nlohmann::json jsonObject = value->second;
+	nlohmann::json object = jsonObject; // need copy to do dumb nested get
+
+	int i;
+	for (i = 1; i < arrayData.size(); i++)
+	{
+		object = object[arrayData[i]];
+	}
+
+	std::ofstream MyFile;
+	// logger stuff.... debug 
+	MyFile.open("@A3A-intercept-plugin/json/log.txt", std::ios_base::app);
+	MyFile << object << "\n";
+	MyFile << jsonObject << "\n";
+
+	switch (object.type())
+	{
+	case nlohmann::json::value_t::null:
+		return {};
+		break;
+	case nlohmann::json::value_t::boolean:
+		return object.get<bool>();
+		break;
+	case nlohmann::json::value_t::number_float:
+		return object.get<float>();
+		break;
+	case nlohmann::json::value_t::number_integer:
+		return object.get<float>();
+		break;
+	case nlohmann::json::value_t::number_unsigned:
+		return object.get<float>();
+		break;
+	case nlohmann::json::value_t::object:
+		return {};		// objects not supported right now
+		break;
+	case nlohmann::json::value_t::string:
+		return object.get<std::string>();
+		break;
+	case nlohmann::json::value_t::array:
+		// check what we have. boolean, float, or strings
+		switch (object.at(0).type())
+		{
+		case nlohmann::json::value_t::boolean:
+			return object.get<std::vector<bool>>();
+			break;
+		case nlohmann::json::value_t::number_float:
+			return object.get<std::vector<float>>();
+			break;
+		case nlohmann::json::value_t::number_integer:
+			return object.get<std::vector<float>>();
+			break;
+		case nlohmann::json::value_t::number_unsigned:
+			return object.get<std::vector<float>>();
+			break;
+		case nlohmann::json::value_t::string:
+			return object.get<std::vector<std::string>>();
+			break;
+		default:
+			return {};	//ok WTF are you doing with Arma style json???
+		}
+		break;
+	default:
+		return {};
+	}
+	return true;
+}
+
+
+
 
 void hashMap::JsonHashMap::preStart()
 {
@@ -184,7 +285,7 @@ void hashMap::JsonHashMap::preStart()
 	//commands.addCommand("deleteAt", "", userFunctionWrapper<>);
 	//commands.addCommand("forEach", "", userFunctionWrapper<>);
 	commands.addCommand("get", "returns data from key", userFunctionWrapper<jsonHashGet>, game_data_type::ANY, codeType.first, game_data_type::STRING);
-	//commands.addCommand("getNested", "", userFunctionWrapper<jsonHashGet>, game_data_type::ANY, codeType.first, game_data_type::ARRAY);
+	commands.addCommand("getNested", "returns data from a nested object key", userFunctionWrapper<jsonHashGetNested>, game_data_type::ANY, codeType.first, game_data_type::ARRAY);
 	//commands.addCommand("getOrDefault", "", userFunctionWrapper<>, game_data_type::ANY, codeType.first, game_data_type::ARRAY);
 	//commands.addCommand("hashValue", "", userFunctionWrapper<>);
 	//commands.addCommand("in", "", userFunctionWrapper<>);
