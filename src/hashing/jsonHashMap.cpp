@@ -173,27 +173,6 @@ game_value jsonHashGet(game_value_parameter hashmap, game_value_parameter key)
 	return {};
 }
 
-template<class UnaryFunction>
-void recursive_iteration(const nlohmann::json& object, UnaryFunction func)
-{
-	for (auto& item : object)
-	{
-		if (item.is_structured())
-		{
-			if (item.is_array()) {
-				recursive_iteration(item, func);
-			}
-			else if (item.is_object())
-			{
-				func(item);
-			}
-		}
-		else
-		{
-			func(item);
-		}
-	}
-}
 
 game_value jsonHashGetNested(game_value_parameter hashmap, game_value_parameter arrayData)
 {
@@ -269,8 +248,96 @@ game_value jsonHashGetNested(game_value_parameter hashmap, game_value_parameter 
 	return true;
 }
 
+template<class UnaryFunction>
+void recursive_iteration(const nlohmann::json& object, UnaryFunction func)
+{
+	for (auto& item : object)
+	{
+		if (item.is_structured())
+		{
+			if (item.is_array()) {
+				recursive_iteration(item, func);
+			}
+			else if (item.is_object())
+			{
+				func(item);
+			}
+		}
+		else
+		{
+			func(item);
+		}
+	}
+}
 
+game_value jsonHashIsIn(game_value_parameter key, game_value_parameter hashmap)
+{
+	if (hashmap.is_nil()) { return {}; }
+	auto hashMapPointer = static_cast<JsonGameDataHashMap*>(hashmap.data.get());
+	auto contain = hashMapPointer->map.find(key);
+	if (contain != hashMapPointer->map.end()) { return true; }
+	return false;
+}
 
+game_value jsonHashIsInNested(game_value_parameter key, game_value_parameter hashmap)
+{
+	if (hashmap.is_nil()) { return {}; }
+	auto hashMapPointer = static_cast<JsonGameDataHashMap*>(hashmap.data.get());
+	auto contain = hashMapPointer->map.find(key);
+	if (contain != hashMapPointer->map.end())
+	{
+		return true; 
+	}
+	else
+	{
+		bool hashContains = false;
+		for (auto& hashMapPairs : hashMapPointer->map)
+		{
+			if (hashMapPairs.second.contains(key))
+			{
+				return true;	//found in in the first level, no need to recurse
+			}
+			recursive_iteration(hashMapPairs.second, [&hashContains, &key](const nlohmann::json& object)
+				{
+					if (object.contains(key)) { hashContains = true; return; }
+					
+				});
+		}
+		return hashContains;
+	}
+}
+
+game_value jsonHashKeyList(game_value_parameter hashmap)
+{
+	if (hashmap.is_nil()) { return 0; };
+	auto hashMapPointer = static_cast<JsonGameDataHashMap*>(hashmap.data.get());
+	std::vector<std::string> keyList;
+	for (auto& hashMapPairs : hashMapPointer->map) {
+		keyList.push_back(hashMapPairs.first);
+	}
+
+	return std::move(keyList);
+}
+
+game_value jsonHashMerge(game_value_parameter modifiedHashmap, game_value_parameter adderHashmap)
+{
+	if (modifiedHashmap.is_nil() || adderHashmap.is_nil()) { return {}; }
+	auto modifiedhashMapPointer = static_cast<JsonGameDataHashMap*>(modifiedHashmap.data.get());
+	auto adderhashMapPointer = static_cast<JsonGameDataHashMap*>(adderHashmap.data.get());
+	modifiedhashMapPointer->map.merge(adderhashMapPointer->map);
+
+	return {};
+}
+
+game_value jsonHashDelete(game_value_parameter hashmap, game_value_parameter key)
+{
+	if (hashmap.is_nil()) { return {}; }
+	auto hashMapPointer = static_cast<JsonGameDataHashMap*>(hashmap.data.get());
+	auto foundKey = hashMapPointer->map.find(key);
+	if( foundKey != hashMapPointer->map.end()) { hashMapPointer->map.erase(foundKey); }
+
+	return {};
+}
 
 void hashMap::JsonHashMap::preStart()
 {
@@ -282,16 +349,17 @@ void hashMap::JsonHashMap::preStart()
 	//commands.addCommand("apply", "", userFunctionWrapper<>);
 	commands.addCommand("count", "", userFunctionWrapper<jsonHashCount>, game_data_type::SCALAR, codeType.first);
 	commands.addCommand("createJsonHashMap", "", userFunctionWrapper<createJsonHashMap>, codeType.first);
-	//commands.addCommand("deleteAt", "", userFunctionWrapper<>);
+	commands.addCommand("deleteAt", "", userFunctionWrapper<jsonHashDelete>, game_data_type::NOTHING, codeType.first, game_data_type::STRING);
 	//commands.addCommand("forEach", "", userFunctionWrapper<>);
 	commands.addCommand("get", "returns data from key", userFunctionWrapper<jsonHashGet>, game_data_type::ANY, codeType.first, game_data_type::STRING);
 	commands.addCommand("getNested", "returns data from a nested object key", userFunctionWrapper<jsonHashGetNested>, game_data_type::ANY, codeType.first, game_data_type::ARRAY);
 	//commands.addCommand("getOrDefault", "", userFunctionWrapper<>, game_data_type::ANY, codeType.first, game_data_type::ARRAY);
-	//commands.addCommand("hashValue", "", userFunctionWrapper<>);
-	//commands.addCommand("in", "", userFunctionWrapper<>);
+	//commands.addCommand("getOrDefaultNested", "", userFunctionWrapper<>, game_data_type::ANY, codeType.first, game_data_type::ARRAY);
+	commands.addCommand("in", "finds if key is in hashmap", userFunctionWrapper<jsonHashIsIn>, game_data_type::BOOL, game_data_type::STRING, codeType.first);
+	commands.addCommand("inNested", "finds if key is in a nested hashmap", userFunctionWrapper<jsonHashIsInNested>, game_data_type::BOOL, game_data_type::STRING, codeType.first);
 	//commands.addCommand("insert", "", userFunctionWrapper<>);
-	//commands.addCommand("keys", "", userFunctionWrapper<>);
-	//commands.addCommand("merge", "", userFunctionWrapper<>);
+	commands.addCommand("keys", "list of json hashmap keys", userFunctionWrapper<jsonHashKeyList>, game_data_type::ARRAY, codeType.first);
+	commands.addCommand("merge", "merges two json hashmaps", userFunctionWrapper<jsonHashMerge>, game_data_type::NOTHING, codeType.first, codeType.first);
 	commands.addCommand("set", "set key value pair in hashmap", userFunctionWrapper<jsonHashSet>, game_data_type::NOTHING, codeType.first, game_data_type::STRING);
 	commands.addCommand("setFromFile", "sets a hashMap from a json file", userFunctionWrapper<jsonHashSetFromFile>, game_data_type::NOTHING, codeType.first, game_data_type::STRING);
 	//commands.addCommand("toArray", "", userFunctionWrapper<>);
