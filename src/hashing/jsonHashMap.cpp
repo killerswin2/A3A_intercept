@@ -339,6 +339,7 @@ game_value jsonHashDelete(game_value_parameter hashmap, game_value_parameter key
 	return {};
 }
 
+
 void hashMap::JsonHashMap::preStart()
 {
 	auto codeType = intercept::client::host::register_sqf_type("JSONHASHMAP"sv, "jsonHashMap"sv, "hashmap for json stuff", "jsonHashMap"sv, createJsonGameDataHashMap);
@@ -347,8 +348,8 @@ void hashMap::JsonHashMap::preStart()
 	Commands& commands = Commands::get();
 	//commands.addCommand("+", "", userFunctionWrapper<>);
 	//commands.addCommand("apply", "", userFunctionWrapper<>);
-	commands.addCommand("count", "", userFunctionWrapper<jsonHashCount>, game_data_type::SCALAR, codeType.first);
-	commands.addCommand("createJsonHashMap", "", userFunctionWrapper<createJsonHashMap>, codeType.first);
+	commands.addCommand("count", "count key amount", userFunctionWrapper<jsonHashCount>, game_data_type::SCALAR, codeType.first);
+	commands.addCommand("createJsonHashMap", "create a hashmap for json support", userFunctionWrapper<createJsonHashMap>, codeType.first);
 	commands.addCommand("deleteAt", "", userFunctionWrapper<jsonHashDelete>, game_data_type::NOTHING, codeType.first, game_data_type::STRING);
 	//commands.addCommand("forEach", "", userFunctionWrapper<>);
 	commands.addCommand("get", "returns data from key", userFunctionWrapper<jsonHashGet>, game_data_type::ANY, codeType.first, game_data_type::STRING);
@@ -362,6 +363,7 @@ void hashMap::JsonHashMap::preStart()
 	commands.addCommand("merge", "merges two json hashmaps", userFunctionWrapper<jsonHashMerge>, game_data_type::NOTHING, codeType.first, codeType.first);
 	commands.addCommand("set", "set key value pair in hashmap", userFunctionWrapper<jsonHashSet>, game_data_type::NOTHING, codeType.first, game_data_type::STRING);
 	commands.addCommand("setFromFile", "sets a hashMap from a json file", userFunctionWrapper<jsonHashSetFromFile>, game_data_type::NOTHING, codeType.first, game_data_type::STRING);
+	//commands.addCommand("str", "", userFunctionWrapper<>);
 	//commands.addCommand("toArray", "", userFunctionWrapper<>);
 	//commands.addCommand("values", "", userFunctionWrapper<>);
 }
