@@ -293,6 +293,28 @@ game_value jsonHashDelete(game_value_parameter hashmap, game_value_parameter key
 }
 
 
+game_value jsonHashGetOrDefault(game_value_parameter hashmap, game_value_parameter arrayData)
+{
+	if (hashmap.is_nil()) { return {}; }
+	game_value data = jsonHashGet(hashmap, arrayData[0]);
+	if (data.size() == 0)
+	{
+		return arrayData[1];
+	}
+	return data;
+}
+
+game_value jsonHashGetOrDefaultNested(game_value_parameter hashmap, game_value_parameter arrayData)
+{
+	if (hashmap.is_nil()) { return {}; }
+	game_value data = jsonHashGetNested(hashmap, arrayData[0]);
+	if (data.size() == 0)
+	{
+		return arrayData[1];
+	}
+	return data;
+}
+
 void hashMap::JsonHashMap::preStart()
 {
 	auto codeType = intercept::client::host::register_sqf_type("JSONHASHMAP"sv, "jsonHashMap"sv, "hashmap for json stuff", "jsonHashMap"sv, createJsonGameDataHashMap);
@@ -307,8 +329,8 @@ void hashMap::JsonHashMap::preStart()
 	//commands.addCommand("forEach", "", userFunctionWrapper<>);
 	commands.addCommand("get", "returns data from key", userFunctionWrapper<jsonHashGet>, game_data_type::ANY, codeType.first, game_data_type::STRING);
 	commands.addCommand("getNested", "returns data from a nested object key", userFunctionWrapper<jsonHashGetNested>, game_data_type::ANY, codeType.first, game_data_type::ARRAY);
-	//commands.addCommand("getOrDefault", "", userFunctionWrapper<>, game_data_type::ANY, codeType.first, game_data_type::ARRAY);
-	//commands.addCommand("getOrDefaultNested", "", userFunctionWrapper<>, game_data_type::ANY, codeType.first, game_data_type::ARRAY);
+	commands.addCommand("getOrDefault", "returns data or default if not found", userFunctionWrapper<jsonHashGetOrDefault>, game_data_type::ANY, codeType.first, game_data_type::ARRAY);
+	commands.addCommand("getOrDefaultNested", "returns nested data or default if not found", userFunctionWrapper<jsonHashGetOrDefaultNested>, game_data_type::ANY, codeType.first, game_data_type::ARRAY);
 	commands.addCommand("in", "finds if key is in hashmap", userFunctionWrapper<jsonHashIsIn>, game_data_type::BOOL, game_data_type::STRING, codeType.first);
 	commands.addCommand("inNested", "finds if key is in a nested hashmap", userFunctionWrapper<jsonHashIsInNested>, game_data_type::BOOL, game_data_type::STRING, codeType.first);
 	//commands.addCommand("insert", "", userFunctionWrapper<>);
