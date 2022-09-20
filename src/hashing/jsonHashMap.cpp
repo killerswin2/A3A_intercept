@@ -105,97 +105,8 @@ game_value jsonHashCount(game_value_parameter hashmap)
 	return static_cast<JsonGameDataHashMap*>(hashmap.data.get())->map.size();
 }
 
-
-
-game_value jsonHashGet(game_value_parameter hashmap, game_value_parameter key)
+game_value jsonHashConvertToGameType(nlohmann::json& object)
 {
-	// hashmap can't be nil or key can't be anything other than string.
-	if (hashmap.is_nil() || key.type_enum() != game_data_type::STRING) return {};
-	game_value retData;
-	auto hashMapPointer = static_cast<JsonGameDataHashMap*>(hashmap.data.get());
-	auto value = hashMapPointer->map.find(key);
-	if (value != hashMapPointer->map.end())
-	{
-
-		switch (value->second.type())
-		{
-		case nlohmann::json::value_t::null:
-			return {};
-			break;
-		case nlohmann::json::value_t::boolean:
-			return value->second.get<bool>();
-			break;
-		case nlohmann::json::value_t::number_float:
-			return value->second.get<float>();
-			break;
-		case nlohmann::json::value_t::number_integer:
-			return value->second.get<float>();
-			break;
-		case nlohmann::json::value_t::number_unsigned:
-			return value->second.get<float>();
-			break;
-		case nlohmann::json::value_t::object:
-			return {};		// objects not supported right now
-			break;
-		case nlohmann::json::value_t::string:
-			return value->second.get<std::string>();
-			break;
-		case nlohmann::json::value_t::array:
-			// check what we have. boolean, float, or strings
-			switch (value->second.at(0).type())
-			{
-			case nlohmann::json::value_t::boolean:
-				return value->second.get<std::vector<bool>>();
-				break;
-			case nlohmann::json::value_t::number_float:
-				return value->second.get<std::vector<float>>();
-				break;
-			case nlohmann::json::value_t::number_integer:
-				return value->second.get<std::vector<float>>();
-				break;
-			case nlohmann::json::value_t::number_unsigned:
-				return value->second.get<std::vector<float>>();
-				break;
-			case nlohmann::json::value_t::string:
-				return value->second.get<std::vector<std::string>>();
-				break;
-			default:
-				return {};	//ok WTF are you doing with Arma style json???
-			}
-			break;
-		default:
-			return {};
-		}
-
-
-	}
-
-	return {};
-}
-
-
-game_value jsonHashGetNested(game_value_parameter hashmap, game_value_parameter arrayData)
-{
-	//return if the hashmap is nil, or the array arg size is not bigger than 1
-	if (hashmap.is_nil() || arrayData.size() < 1) { return {}; }
-	if (arrayData.size() == 1) { return jsonHashGet(hashmap, arrayData[0]); }
-	auto hashMapPointer = static_cast<JsonGameDataHashMap*>(hashmap.data.get());
-	auto value = hashMapPointer->map.find(arrayData[0]);
-	nlohmann::json jsonObject = value->second;
-	nlohmann::json object = jsonObject; // need copy to do dumb nested get
-
-	int i;
-	for (i = 1; i < arrayData.size(); i++)
-	{
-		object = object[arrayData[i]];
-	}
-
-	std::ofstream MyFile;
-	// logger stuff.... debug 
-	MyFile.open("@A3A-intercept-plugin/json/log.txt", std::ios_base::app);
-	MyFile << object << "\n";
-	MyFile << jsonObject << "\n";
-
 	switch (object.type())
 	{
 	case nlohmann::json::value_t::null:
@@ -245,7 +156,49 @@ game_value jsonHashGetNested(game_value_parameter hashmap, game_value_parameter 
 	default:
 		return {};
 	}
-	return true;
+}
+
+
+game_value jsonHashGet(game_value_parameter hashmap, game_value_parameter key)
+{
+	// hashmap can't be nil or key can't be anything other than string.
+	if (hashmap.is_nil() || key.type_enum() != game_data_type::STRING) return {};
+	game_value retData;
+	auto hashMapPointer = static_cast<JsonGameDataHashMap*>(hashmap.data.get());
+	auto value = hashMapPointer->map.find(key);
+	if (value != hashMapPointer->map.end())
+	{
+		return jsonHashConvertToGameType(value->second);
+	}
+
+	return {};
+}
+
+
+game_value jsonHashGetNested(game_value_parameter hashmap, game_value_parameter arrayData)
+{
+	//return if the hashmap is nil, or the array arg size is not bigger than 1
+	if (hashmap.is_nil() || arrayData.size() < 1) { return {}; }
+	if (arrayData.size() == 1) { return jsonHashGet(hashmap, arrayData[0]); }
+	auto hashMapPointer = static_cast<JsonGameDataHashMap*>(hashmap.data.get());
+	auto value = hashMapPointer->map.find(arrayData[0]);
+	nlohmann::json jsonObject = value->second;
+	nlohmann::json object = jsonObject; // need copy to do dumb nested get
+
+	int i;
+	for (i = 1; i < arrayData.size(); i++)
+	{
+		object = object[arrayData[i]];
+	}
+
+	std::ofstream MyFile;
+	// logger stuff.... debug 
+	MyFile.open("@A3A-intercept-plugin/json/log.txt", std::ios_base::app);
+	MyFile << object << "\n";
+	MyFile << jsonObject << "\n";
+
+	return jsonHashConvertToGameType(object);
+	
 }
 
 template<class UnaryFunction>
