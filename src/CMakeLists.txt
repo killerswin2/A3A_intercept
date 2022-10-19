@@ -44,11 +44,20 @@ endif()
 file(GLOB INTERCEPT_HOST_SOURCES "${INTERCEPT_CLIENT_PATH}/intercept/client/*.cpp"  "${INTERCEPT_CLIENT_PATH}/intercept/client/sqf/*.cpp" "${INTERCEPT_CLIENT_PATH}/intercept/shared/*.cpp")
 SOURCE_GROUP("intercept" FILES ${INTERCEPT_HOST_SOURCES})
 
-add_library( ${INTERCEPT_PLUGIN_NAME} SHARED ${INTERCEPT_PLUGIN_SOURCES} ${INTERCEPT_HOST_SOURCES} "hashing/jsonHashMap.cpp"  "hashing/jsonHashMap.hpp")
+add_library( ${INTERCEPT_PLUGIN_NAME} SHARED ${INTERCEPT_PLUGIN_SOURCES} ${INTERCEPT_HOST_SOURCES} "hashing/jsonHashMap.cpp"  "hashing/jsonHashMap.hpp" "physics/towing.cpp")
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${INTERCEPT_INCLUDE_PATH})
-target_link_libraries(${INTERCEPT_PLUGIN_NAME} glm::glm)
-target_include_directories(${INTERCEPT_PLUGIN_NAME} PUBLIC vendors/glm/glm)
+
+# Newton libs and header files
+include_directories(../Dependencies/ND/include/ndNewton)
+set(CMAKE_LIBRARY_PATH ../Dependencies/ND/lib)
+
+# Ensure the Newton libraries are installed.
+find_library(NEWTON_LIB ndNewton REQUIRED)
+find_library(AVX_LIB ndSolverAvx2 REQUIRED)
+
+target_link_libraries(${INTERCEPT_PLUGIN_NAME} glm::glm ${NEWTON_LIB} ${AVX_LIB})		# until I have a better understanding of cmake this will work!
+target_include_directories(${INTERCEPT_PLUGIN_NAME} PUBLIC vendors/glm/glm PUBLIC Dependencies/ND/include/ndNewton)
 
 
 set_target_properties(${INTERCEPT_PLUGIN_NAME} PROPERTIES PREFIX "")
